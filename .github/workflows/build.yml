@@ -1,0 +1,151 @@
+name: Build and publish NuGet packages
+
+# This workflow builds, tests, packs, and publishes the public RetroSound
+# NuGet packages. It is intentionally limited to release-style entry points:
+# version tags for normal releases and manual dispatch for controlled reruns.
+on:
+  push:
+    # A pushed version tag is treated as an explicit release signal.
+    # Tags such as v0.8.0, v.0.8.0, or v0.8.0-RC1 will run the full pipeline
+    # and attempt publication to nuget.org after build, test, and pack complete.
+    tags:
+      - "v*"
+  # Manual runs are useful for validating the publishing pipeline or retrying
+  # a failed release without creating an additional tag.
+  workflow_dispatch:
+
+# Default workflow permissions stay minimal. The job itself requests the extra
+# OIDC permission that trusted publishing needs.
+permissions:
+  contents: read
+
+# Shared environment values keep the steps consistent and make future changes
+# easier. The workflow uses the .NET 10 SDK, creates Release packages, and
+# pushes them to the official nuget.org v3 feed.
+env:
+  # Opt into the GitHub Actions Node 24 runtime ahead of the platform-wide
+  # switch. This removes the deprecation warning for actions that can already
+  # run on Node 24 and keeps NuGet/login aligned with the upcoming default.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  DOTNET_VERSION: "10.0.x"
+  CONFIGURATION: Release
+  NUGET_SOURCE: https://api.nuget.org/v3/index.json
+
+jobs:
+  # A single job keeps the release flow linear and easy to audit:
+  # restore -> build -> test -> pack -> publish.
+  build-pack-publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      # Trusted publishing uses GitHub's OpenID Connect token exchange.
+      # Without this permission, NuGet/login cannot request the short-lived
+      # publishing credential from nuget.org.
+      id-token: write
+
+    steps:
+      # Fetch the repository contents so the SDK can restore, build, and pack
+      # the solution exactly as it exists at the tagged commit.
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      # Install the requested .NET SDK version on the GitHub Actions runner.
+      # Using setup-dotnet here keeps the workflow independent from whatever
+      # SDKs happen to be preinstalled on the hosted image.
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # Derive the package version from the Git tag when the workflow runs from
+      # a release tag such as v0.8.0 or v.0.8.0. For non-tag runs, keep the
+      # version unset here so the fallback value from Directory.Build.props
+      # remains active.
+      - name: Derive package version from tag
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+            PACKAGE_VERSION="${PACKAGE_VERSION#.}"
+
+            if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+              echo "Tag '$GITHUB_REF_NAME' does not map to a valid NuGet package version."
+              echo "Use tags like v0.9.0, v.0.9.0, v0.9.0-RC1, or v.0.9.0-RC1."
+              exit 1
+            fi
+
+            echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
+            echo "VERSION_ARGS=-p:Version=$PACKAGE_VERSION" >> "$GITHUB_ENV"
+          else
+            echo "VERSION_ARGS=" >> "$GITHUB_ENV"
+          fi
+
+      # Restore all solution dependencies once up front so the later build,
+      # test, and pack steps can reuse the resolved graph.
+      - name: Restore solution
+        run: dotnet restore RetroSound.sln
+
+      # Compile the full solution in Release configuration. Building the entire
+      # solution helps catch packaging regressions in referenced projects before
+      # a publish attempt is made.
+      - name: Build solution
+        run: dotnet build RetroSound.sln --configuration $CONFIGURATION --no-restore $VERSION_ARGS
+
+      # Run the test project before packing and publishing. This protects the
+      # release pipeline from shipping packages when the regression suite fails.
+      - name: Test solution
+        run: dotnet test tests/RetroSound.Tests/RetroSound.Tests.csproj --configuration $CONFIGURATION --no-build
+
+      # Create NuGet packages for the library projects only.
+      # Samples and tests are intentionally excluded by scanning src/*/*.csproj,
+      # which matches the public package layout of the solution.
+      - name: Pack NuGet projects
+        run: |
+          mkdir -p artifacts/packages
+
+          # Each project is packed separately so RetroSound.Core,
+          # RetroSound.Ayumi, and RetroSound.NAudio each produce their own
+          # publishable .nupkg artifact.
+          for project in src/*/*.csproj; do
+            dotnet pack "$project" \
+              --configuration "$CONFIGURATION" \
+              --no-build \
+              --output artifacts/packages \
+              $VERSION_ARGS
+          done
+
+      # Upload the generated packages as a workflow artifact. This makes the
+      # output inspectable even if the publish step fails or is skipped later.
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: nuget-packages
+          path: artifacts/packages/*.nupkg
+          if-no-files-found: error
+
+      # Exchange the GitHub OIDC identity for a short-lived NuGet API key.
+      # This is the core trusted publishing step and avoids storing a permanent
+      # package publishing secret in GitHub.
+      - name: NuGet login
+        id: login
+        uses: NuGet/login@v1
+        with:
+          # This must be the nuget.org profile name that owns or is linked to
+          # the trusted publisher configuration for this repository.
+          user: ${{ secrets.NUGET_USER }}
+
+      # Publish every package produced by the pack step using the temporary
+      # API key returned by NuGet/login. skip-duplicate keeps reruns safer by
+      # not failing when a package version has already been pushed.
+      - name: Publish packages to NuGet.org
+        run: |
+          if [ -z "${{ steps.login.outputs.NUGET_API_KEY }}" ]; then
+            echo "Trusted publishing did not return a temporary NuGet API key."
+            exit 1
+          fi
+
+          dotnet nuget push artifacts/packages/*.nupkg \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source "$NUGET_SOURCE" \
+            --skip-duplicate

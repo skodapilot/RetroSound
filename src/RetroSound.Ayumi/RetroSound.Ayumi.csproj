@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RetroSound.Ayumi</AssemblyName>
+    <RootNamespace>RetroSound.Ayumi</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Description>AY/YM PCM renderer for RetroSound built in pure C#.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RetroSound.Core\RetroSound.Core.csproj" />
+  </ItemGroup>
+</Project>

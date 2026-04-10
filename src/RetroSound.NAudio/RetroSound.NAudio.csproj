@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RetroSound.NAudio</AssemblyName>
+    <RootNamespace>RetroSound.NAudio</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Description>NAudio integration layer for playing RetroSound PCM pipelines on Windows-oriented hosts.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RetroSound.Core\RetroSound.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
+</Project>
