@@ -1,11 +1,13 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Version>0.8</Version>
+    <Version Condition="'$(Version)' == ''">0.0.0-dev</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 		<PackageProjectUrl>https://github.com/skodapilot/RetroSound</PackageProjectUrl>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <LangVersion>preview</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Authors>RetroSound contributors</Authors>
