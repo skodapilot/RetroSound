@@ -8,12 +8,15 @@ namespace RetroSound.NAudio.WaveOut;
 /// </summary>
 public sealed class WaveOutOptions
 {
+    private int _desiredLatencyMilliseconds = 100;
+    private int _numberOfBuffers = 2;
+
     /// <summary>
     /// Gets or sets the desired output latency in milliseconds.
     /// </summary>
     public int DesiredLatencyMilliseconds
     {
-        get;
+        get => _desiredLatencyMilliseconds;
         init
         {
             if (value <= 0)
@@ -21,16 +24,16 @@ public sealed class WaveOutOptions
                 throw new ArgumentOutOfRangeException(nameof(value), "Latency must be greater than zero.");
             }
 
-            field = value;
+            _desiredLatencyMilliseconds = value;
         }
-    } = 100;
+    }
 
     /// <summary>
     /// Gets or sets the number of WaveOut buffers.
     /// </summary>
     public int NumberOfBuffers
     {
-        get;
+        get => _numberOfBuffers;
         init
         {
             if (value <= 0)
@@ -38,7 +41,7 @@ public sealed class WaveOutOptions
                 throw new ArgumentOutOfRangeException(nameof(value), "The number of buffers must be greater than zero.");
             }
 
-            field = value;
+            _numberOfBuffers = value;
         }
-    } = 2;
+    }
 }

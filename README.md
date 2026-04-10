@@ -1,6 +1,8 @@
 # RetroSound
 
-RetroSound is a public .NET 10 library for loading retro AY/YM tracker music data, including TurboSound containers and PT3 modules, producing AY/YM register frames, emulating audio generation, and exposing PCM audio for host applications.
+RetroSound is a public .NET library for loading retro AY/YM tracker music data, including TurboSound containers and PT3 modules, producing AY/YM register frames, emulating audio generation, and exposing PCM audio for host applications.
+
+The current packages multi-target .NET 8, .NET 9, and .NET 10 so host applications can integrate the library without requiring the newest runtime.
 
 The codebase was originally developed for integration into About pages in desktop applications, so it is not intended to be a player in the usual end-user sense. The primary goal is embeddable playback infrastructure for host applications rather than a full standalone listening experience.
 

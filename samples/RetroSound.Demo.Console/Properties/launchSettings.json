@@ -4,7 +4,7 @@
     "RetroSound.Demo.Console": {
       "commandName": "Project",
       "workingDirectory": "$(ProjectDir)",
-      "commandLineArgs": "\"C:\\repos\\TurboSoundLib\\samples\\example2.pt3\" \"48000\""
+      "commandLineArgs": "\"..\\example.pt3\" \"48000\""
     }
   }
 }
