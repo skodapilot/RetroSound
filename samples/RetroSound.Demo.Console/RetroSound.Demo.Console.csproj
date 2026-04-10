@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RetroSound.Demo.Console</AssemblyName>
+    <RootNamespace>RetroSound.Demo.Console</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RetroSound.Ayumi\RetroSound.Ayumi.csproj" />
+    <ProjectReference Include="..\..\src\RetroSound.Core\RetroSound.Core.csproj" />
+    <ProjectReference Include="..\..\src\RetroSound.NAudio\RetroSound.NAudio.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,45 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroSound.Core", "src/RetroSound.Core/RetroSound.Core.csproj", "{40589D9B-24DA-499A-8C7A-79A1E03F9454}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroSound.Tests", "tests/RetroSound.Tests/RetroSound.Tests.csproj", "{55D599D8-75B9-4C2E-967C-02F4D242CD7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroSound.NAudio", "src/RetroSound.NAudio/RetroSound.NAudio.csproj", "{08C6A152-191E-46F6-A97F-05FA5F4887CB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroSound.Demo.Console", "samples/RetroSound.Demo.Console/RetroSound.Demo.Console.csproj", "{8D83E754-2E60-4139-8C10-E60C245D72CB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroSound.Ayumi", "src/RetroSound.Ayumi/RetroSound.Ayumi.csproj", "{D7DC5A6B-9F0C-4D50-8BA8-B33B47288E52}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40589D9B-24DA-499A-8C7A-79A1E03F9454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40589D9B-24DA-499A-8C7A-79A1E03F9454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40589D9B-24DA-499A-8C7A-79A1E03F9454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40589D9B-24DA-499A-8C7A-79A1E03F9454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55D599D8-75B9-4C2E-967C-02F4D242CD7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55D599D8-75B9-4C2E-967C-02F4D242CD7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55D599D8-75B9-4C2E-967C-02F4D242CD7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55D599D8-75B9-4C2E-967C-02F4D242CD7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08C6A152-191E-46F6-A97F-05FA5F4887CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08C6A152-191E-46F6-A97F-05FA5F4887CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08C6A152-191E-46F6-A97F-05FA5F4887CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08C6A152-191E-46F6-A97F-05FA5F4887CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D83E754-2E60-4139-8C10-E60C245D72CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D83E754-2E60-4139-8C10-E60C245D72CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D83E754-2E60-4139-8C10-E60C245D72CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D83E754-2E60-4139-8C10-E60C245D72CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7DC5A6B-9F0C-4D50-8BA8-B33B47288E52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7DC5A6B-9F0C-4D50-8BA8-B33B47288E52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7DC5A6B-9F0C-4D50-8BA8-B33B47288E52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7DC5A6B-9F0C-4D50-8BA8-B33B47288E52}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

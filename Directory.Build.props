@@ -1,0 +1,34 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Version>0.8</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>preview</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Authors>RetroSound contributors</Authors>
+    <Copyright>Copyright (c) 2026 Anton Shirokov</Copyright>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>retro;audio;ay;ym;ay-3-8910;ym2149;chiptune;pt3;turbosound</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="" Link="LICENSE" />
+    <None Include="$(MSBuildProjectDirectory)/README.md"
+          Pack="true"
+          PackagePath=""
+          Link="README.md"
+          Condition="Exists('$(MSBuildProjectDirectory)/README.md')" />
+    <None Include="$(MSBuildThisFileDirectory)README.md"
+          Pack="true"
+          PackagePath=""
+          Link="README.md"
+          Condition="!Exists('$(MSBuildProjectDirectory)/README.md')" />
+  </ItemGroup>
+</Project>

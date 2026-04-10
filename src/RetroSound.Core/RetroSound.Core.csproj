@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RetroSound.Core</AssemblyName>
+    <RootNamespace>RetroSound.Core</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Description>Core RetroSound APIs for parsing tracker formats, producing AY/YM register frames, coordinating playback, and rendering PCM through pluggable emulators.</Description>
+  </PropertyGroup>
+</Project>
