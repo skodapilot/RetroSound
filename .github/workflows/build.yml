@@ -62,6 +62,13 @@ jobs:
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+
+            if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+              echo "Tag '$GITHUB_REF_NAME' does not map to a valid NuGet package version."
+              echo "Use tags like v0.9.0 or v0.9.0-RC1."
+              exit 1
+            fi
+
             echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> "$GITHUB_ENV"
             echo "VERSION_ARGS=-p:Version=$PACKAGE_VERSION" >> "$GITHUB_ENV"
           else
