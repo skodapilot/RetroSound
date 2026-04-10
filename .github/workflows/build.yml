@@ -23,6 +23,10 @@ permissions:
 # easier. The workflow uses the .NET 10 SDK, creates Release packages, and
 # pushes them to the official nuget.org v3 feed.
 env:
+  # Opt into the GitHub Actions Node 24 runtime ahead of the platform-wide
+  # switch. This removes the deprecation warning for actions that can already
+  # run on Node 24 and keeps NuGet/login aligned with the upcoming default.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   DOTNET_VERSION: "10.0.x"
   CONFIGURATION: Release
   NUGET_SOURCE: https://api.nuget.org/v3/index.json
@@ -44,13 +48,13 @@ jobs:
       # Fetch the repository contents so the SDK can restore, build, and pack
       # the solution exactly as it exists at the tagged commit.
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Install the requested .NET SDK version on the GitHub Actions runner.
       # Using setup-dotnet here keeps the workflow independent from whatever
       # SDKs happen to be preinstalled on the hosted image.
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -112,7 +116,7 @@ jobs:
       # Upload the generated packages as a workflow artifact. This makes the
       # output inspectable even if the publish step fails or is skipped later.
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: nuget-packages
           path: artifacts/packages/*.nupkg
