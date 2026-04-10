@@ -6,8 +6,8 @@ name: Build and publish NuGet packages
 on:
   push:
     # A pushed version tag is treated as an explicit release signal.
-    # Tags such as v0.8.0 or v1.0.0 will run the full pipeline and attempt
-    # publication to nuget.org after build, test, and pack complete.
+    # Tags such as v0.8.0, v.0.8.0, or v0.8.0-RC1 will run the full pipeline
+    # and attempt publication to nuget.org after build, test, and pack complete.
     tags:
       - "v*"
   # Manual runs are useful for validating the publishing pipeline or retrying
@@ -59,17 +59,19 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       # Derive the package version from the Git tag when the workflow runs from
-      # a release tag such as v0.8.0. For non-tag runs, keep the version unset
-      # here so the fallback value from Directory.Build.props remains active.
+      # a release tag such as v0.8.0 or v.0.8.0. For non-tag runs, keep the
+      # version unset here so the fallback value from Directory.Build.props
+      # remains active.
       - name: Derive package version from tag
         shell: bash
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             PACKAGE_VERSION="${GITHUB_REF_NAME#v}"
+            PACKAGE_VERSION="${PACKAGE_VERSION#.}"
 
             if [[ ! "$PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
               echo "Tag '$GITHUB_REF_NAME' does not map to a valid NuGet package version."
-              echo "Use tags like v0.9.0 or v0.9.0-RC1."
+              echo "Use tags like v0.9.0, v.0.9.0, v0.9.0-RC1, or v.0.9.0-RC1."
               exit 1
             fi
 
