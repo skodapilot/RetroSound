@@ -4,6 +4,8 @@
     <Version>0.8</Version>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+		<PackageProjectUrl>https://github.com/skodapilot/RetroSound</PackageProjectUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
     <LangVersion>preview</LangVersion>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <Authors>RetroSound contributors</Authors>
