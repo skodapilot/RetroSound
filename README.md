@@ -4,14 +4,6 @@ RetroSound is a public .NET library for loading retro AY/YM tracker music data, 
 
 The current packages multi-target .NET 8, .NET 9, and .NET 10 so host applications can integrate the library without requiring the newest runtime.
 
-## Installation
-
-Installation is available through NuGet packages:
-
-- [RetroSound.Core](https://www.nuget.org/packages/RetroSound.Core/)
-- [RetroSound.Ayumi](https://www.nuget.org/packages/RetroSound.Ayumi/)
-- [RetroSound.NAudio](https://www.nuget.org/packages/RetroSound.NAudio/)
-
 The codebase was originally developed for integration into About pages in desktop applications, so it is not intended to be a player in the usual end-user sense. The primary goal is embeddable playback infrastructure for host applications rather than a full standalone listening experience.
 
 ## Architecture
@@ -24,15 +16,6 @@ The solution is organized into small, focused layers:
 - `RetroSound.Demo.Console` for a minimal host application used during development.
 - `RetroSound.Tests` for unit tests covering the core library.
 
-## Development Status
-
-Current playback paths:
-
-- TS containers whose payloads already contain 14-byte AY register frames.
-- Standalone PT3 modules parsed into a dedicated PT3 tick player.
-
-The playback pipeline intentionally keeps input parsing, tracker state progression, AY/YM register emission, chip emulation, and host audio output separated so new tracker formats can reuse the same backend.
-
 ## Reference Projects
 
 The current implementation was informed by these public reference projects:
@@ -43,7 +26,15 @@ The current implementation was informed by these public reference projects:
 The sample file `samples/example.pt3` is `Hibernation` by MMCM and is available on ZXArt:
 [zxart.ee/eng/authors/m/mmcm1/hibernation](https://zxart.ee/eng/authors/m/mmcm1/hibernation/)
 
-## Minimal PT3 Usage
+## Installation
+
+Installation is available through NuGet packages:
+
+- [RetroSound.Core](https://www.nuget.org/packages/RetroSound.Core/)
+- [RetroSound.Ayumi](https://www.nuget.org/packages/RetroSound.Ayumi/)
+- [RetroSound.NAudio](https://www.nuget.org/packages/RetroSound.NAudio/)
+
+## Minimal Usage
 
 ```csharp
 using RetroSound.Ayumi;
@@ -66,6 +57,15 @@ playback.Start();
 await playback.WaitForPlaybackStoppedAsync();
 ```
 
+## Development Status
+
+Current playback paths:
+
+- TS containers whose payloads already contain 14-byte AY register frames.
+- Standalone PT3 modules parsed into a dedicated PT3 tick player.
+
+The playback pipeline intentionally keeps input parsing, tracker state progression, AY/YM register emission, chip emulation, and host audio output separated so new tracker formats can reuse the same backend.
+
 ## PT3 Notes
 
 The current PT3 player focuses on a safe, testable baseline:
@@ -81,7 +81,7 @@ Current PT3 limitations:
 - Advanced PT3 effects are parsed conservatively and are not yet rendered musically.
 - Restart-position looping is supported and can be toggled at runtime through `Pt3Player.IsLoopingEnabled`.
 
-## Managed AY/YM Backend
+## AY/YM Notes
 
 The ayumi-oriented renderer lives in `RetroSound.Ayumi` and stays behind the `IAyYmSampleRendererBackend` contract used by `AyYmChipEmulator`.
 
