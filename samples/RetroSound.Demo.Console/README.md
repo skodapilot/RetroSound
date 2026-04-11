@@ -10,7 +10,7 @@ It is not the core library and not intended as a polished end-user player. Its p
 - Loading standalone PT3 modules
 - Loading PT3-based TurboSound modules
 - Wiring `RetroSound.Core`, `RetroSound.Ayumi`, and `RetroSound.NAudio` into one playback flow
-- Basic pause, resume, stop, and loop-toggle controls
+- Basic pause, resume, stop, loop-toggle, and volume controls
 
 ## Pipeline Overview
 
@@ -37,4 +37,11 @@ Example:
 ```bash
 dotnet run --project samples/RetroSound.Demo.Console -- samples/example.pt3 48000
 ```
+
+Controls while playing:
+
+- `P` or `Space`: pause or resume playback
+- `-` or `+`: decrease or increase playback volume
+- `L`: toggle loop playback when the current player supports it
+- `Ctrl+C`: stop playback early
 

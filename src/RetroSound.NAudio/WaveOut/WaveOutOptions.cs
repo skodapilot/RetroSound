@@ -10,6 +10,7 @@ public sealed class WaveOutOptions
 {
     private int _desiredLatencyMilliseconds = 100;
     private int _numberOfBuffers = 2;
+    private float _initialVolume = 1.0f;
 
     /// <summary>
     /// Gets or sets the desired output latency in milliseconds.
@@ -42,6 +43,23 @@ public sealed class WaveOutOptions
             }
 
             _numberOfBuffers = value;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the initial playback volume in the inclusive range from 0.0 to 1.0.
+    /// </summary>
+    public float InitialVolume
+    {
+        get => _initialVolume;
+        init
+        {
+            if (value is < 0.0f or > 1.0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "The initial volume must be between 0.0 and 1.0.");
+            }
+
+            _initialVolume = value;
         }
     }
 }

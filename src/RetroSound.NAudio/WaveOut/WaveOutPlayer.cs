@@ -28,6 +28,7 @@ public sealed class WaveOutPlayer : IDisposable
             DesiredLatency = resolvedOptions.DesiredLatencyMilliseconds,
             NumberOfBuffers = resolvedOptions.NumberOfBuffers,
         };
+        _outputDevice.Volume = resolvedOptions.InitialVolume;
 
         _playbackStoppedSource = CreatePlaybackStoppedSource();
         _outputDevice.PlaybackStopped += OnPlaybackStopped;
@@ -104,6 +105,29 @@ public sealed class WaveOutPlayer : IDisposable
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
             return _outputDevice.PlaybackState == PlaybackState.Paused;
+        }
+    }
+
+    /// <summary>
+    /// Gets or sets the playback volume in the inclusive range from 0.0 to 1.0.
+    /// </summary>
+    public float Volume
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            return _outputDevice.Volume;
+        }
+        set
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+
+            if (value is < 0.0f or > 1.0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "The volume must be between 0.0 and 1.0.");
+            }
+
+            _outputDevice.Volume = value;
         }
     }
 

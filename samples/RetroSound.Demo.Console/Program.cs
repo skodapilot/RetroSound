@@ -11,6 +11,7 @@ using RetroSound.NAudio;
 using RetroSound.NAudio.WaveOut;
 
 const int defaultSampleRate = 48_000;
+const float volumeStep = 0.1f;
 
 if (args.Length == 0)
 {
@@ -201,12 +202,23 @@ static async Task MonitorPlaybackInputAsync(
             loopingController.IsLoopingEnabled = !loopingController.IsLoopingEnabled;
             Console.WriteLine($"Loop playback {(loopingController.IsLoopingEnabled ? "enabled" : "disabled")}.");
         }
+        else if (IsVolumeDownKey(key))
+        {
+            playback.Volume = Math.Max(0.0f, playback.Volume - volumeStep);
+            Console.WriteLine($"Playback volume: {playback.Volume:P0}.");
+        }
+        else if (IsVolumeUpKey(key))
+        {
+            playback.Volume = Math.Min(1.0f, playback.Volume + volumeStep);
+            Console.WriteLine($"Playback volume: {playback.Volume:P0}.");
+        }
     }
 }
 
 static void PrintPlaybackControls(ILoopingPlaybackController? loopingController)
 {
     Console.WriteLine("Press P or Space to pause/resume.");
+    Console.WriteLine("Press - or + to decrease or increase playback volume.");
 
     if (loopingController?.SupportsLooping == true)
     {
@@ -227,6 +239,16 @@ static bool CanReadConsoleInput()
     {
         return false;
     }
+}
+
+static bool IsVolumeDownKey(ConsoleKeyInfo key)
+{
+    return key.Key is ConsoleKey.Subtract or ConsoleKey.OemMinus || key.KeyChar == '-';
+}
+
+static bool IsVolumeUpKey(ConsoleKeyInfo key)
+{
+    return key.Key is ConsoleKey.Add or ConsoleKey.OemPlus || key.KeyChar == '+';
 }
 
 static void PrintPt3TurboSoundDiagnostics(Pt3TurboSoundLoadDiagnostics diagnostics)

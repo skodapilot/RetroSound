@@ -9,6 +9,7 @@ It bridges RetroSound PCM sources to NAudio by exposing `ISampleProvider` adapte
 - Adapting `IPcmSampleSource` to NAudio `ISampleProvider`
 - Stereo output normalization for RetroSound PCM streams
 - Basic playback hosting through `WaveOutPlayer`
+- Playback volume control through `WaveOutPlayer.Volume`
 
 ## What This Project Depends On
 

@@ -1,4 +1,4 @@
-name: Build and publish NuGet packages
+name: Publish NuGet Packages
 
 # This workflow builds, tests, packs, and publishes the public RetroSound
 # NuGet packages. It is intentionally limited to release-style entry points:
