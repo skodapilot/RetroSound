@@ -4,6 +4,14 @@ RetroSound is a public .NET library for loading retro AY/YM tracker music data, 
 
 The current packages multi-target .NET 8, .NET 9, and .NET 10 so host applications can integrate the library without requiring the newest runtime.
 
+## Installation
+
+Installation is available through NuGet packages:
+
+- [RetroSound.Core](https://www.nuget.org/packages/RetroSound.Core/)
+- [RetroSound.Ayumi](https://www.nuget.org/packages/RetroSound.Ayumi/)
+- [RetroSound.NAudio](https://www.nuget.org/packages/RetroSound.NAudio/)
+
 The codebase was originally developed for integration into About pages in desktop applications, so it is not intended to be a player in the usual end-user sense. The primary goal is embeddable playback infrastructure for host applications rather than a full standalone listening experience.
 
 ## Architecture
