@@ -4,7 +4,7 @@
     "RetroSound.Demo.Console": {
       "commandName": "Project",
       "workingDirectory": "$(ProjectDir)",
-      "commandLineArgs": "\"..\\example.pt3\" \"48000\""
+      "commandLineArgs": "\"..\\example2.pt3\" \"48000\""
     }
   }
 }

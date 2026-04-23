@@ -21,22 +21,19 @@ It bridges RetroSound PCM sources to NAudio by exposing `ISampleProvider` adapte
 
 ```csharp
 using RetroSound.Ayumi;
-using RetroSound.Core.Formats.Pt3;
 using RetroSound.Core.Models;
-using RetroSound.Core.Playback;
 using RetroSound.Core.Rendering;
 using RetroSound.NAudio;
 using RetroSound.NAudio.WaveOut;
 
-var module = new Pt3ModuleLoader().LoadFromFile("music.pt3");
-var player = new Pt3Player(module, sampleRate: 48_000, stopAfterOrderList: true);
+using var session = RetroSoundPlaybackSession.CreateFromFile(
+    "music.pt3",
+    sampleRate: 48_000,
+    createChipEmulator: () => new AyYmChipEmulator(
+        new AyumiPcmRenderer(),
+        new AyYmChipConfiguration(outputChannelCount: 2)));
 
-using var emulator = new AyYmChipEmulator(
-    new AyumiPcmRenderer(),
-    new AyYmChipConfiguration(outputChannelCount: 1));
-
-var provider = new RetroSoundSampleProvider(player, emulator);
-using var playback = new WaveOutPlayer(provider, new WaveOutOptions());
+using var playback = new WaveOutPlayer(session.SampleProvider, new WaveOutOptions());
 
 playback.Start();
 await playback.WaitForPlaybackStoppedAsync();

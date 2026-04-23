@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 using RetroSound.Ayumi;
-using RetroSound.Core.Playback;
-using RetroSound.Core.Formats.TurboSound;
-using RetroSound.Core.Rendering;
 using RetroSound.Core.Formats.Pt3;
+using RetroSound.Core.Formats.TurboSound;
 using RetroSound.Core.Models;
+using RetroSound.Core.Playback;
+using RetroSound.Core.Rendering;
 using RetroSound.NAudio;
 using RetroSound.NAudio.WaveOut;
 
@@ -22,27 +22,7 @@ if (args.Length == 0)
 
 var filePath = Path.GetFullPath(args[0]);
 var sampleRate = ResolveSampleRate(args);
-var inputKind = DetectInputKind(filePath);
-switch (inputKind)
-{
-    case TurboSoundInputKind.TsContainer:
-        await PlayTurboSoundContainerAsync(filePath, sampleRate);
-        break;
-    case TurboSoundInputKind.Pt3Module:
-        await PlayPt3ModuleAsync(filePath, sampleRate);
-        break;
-    case TurboSoundInputKind.Pt3TurboSoundModule:
-        await PlayPt3TurboSoundModuleAsync(filePath, sampleRate);
-        break;
-    default:
-        throw new NotSupportedException(
-            "The input is not a supported RetroSound format. Expected a TS container, a PT3 module signature, or a PT3 TurboSound module.");
-}
-
-static TurboSoundInputKind DetectInputKind(string filePath)
-{
-    return TurboSoundInputDetector.DetectFromFile(filePath);
-}
+await PlaySupportedInputAsync(filePath, sampleRate);
 
 static int ResolveSampleRate(string[] args)
 {
@@ -59,68 +39,59 @@ static int ResolveSampleRate(string[] args)
     throw new ArgumentException("The optional sample rate must be a positive integer.", nameof(args));
 }
 
-static async Task PlayTurboSoundContainerAsync(string filePath, int sampleRate)
+static async Task PlaySupportedInputAsync(string filePath, int sampleRate)
 {
-    var container = new TsContainerParser().LoadFromFile(filePath);
-    var player = new DualChipPlayer(
-        new RegisterFramePlayer(container.FirstModule.Payload, sampleRate),
-        new RegisterFramePlayer(container.SecondModule.Payload, sampleRate));
+    var inputKind = TurboSoundInputDetector.DetectFromFile(filePath);
+    var diagnostics = inputKind is TurboSoundInputKind.Pt3Module or TurboSoundInputKind.Pt3TurboSoundModule
+        ? new Pt3TurboSoundModuleLoader().AnalyzeFromFile(filePath)
+        : null;
 
-    using var chipAEmulator = CreateStereoEmulator();
-    using var chipBEmulator = CreateStereoEmulator();
-    var provider = new RetroSoundSampleProvider(player, chipAEmulator, chipBEmulator);
-    using var playback = CreatePlaybackService(provider);
+    using var session = RetroSoundPlaybackSession.CreateFromFile(
+        filePath,
+        sampleRate,
+        CreateStereoEmulator,
+        stopAfterOrderList: true);
+    using var playback = CreatePlaybackService(session.SampleProvider);
 
-    Console.WriteLine($"Playing TS container '{filePath}' at {sampleRate} Hz.");
-    Console.WriteLine("Playback flow: TS parser -> dual tick player -> AY/YM emulators -> stereo mix -> NAudio.");
-    PrintPlaybackControls(loopingController: null);
+    var displayTitle = string.IsNullOrWhiteSpace(session.Title)
+        ? Path.GetFileName(filePath)
+        : session.Title;
 
-    await RunPlaybackAsync(provider, playback, loopingController: null);
+    Console.WriteLine($"Playing {DescribeInputKind(session.InputKind)} '{displayTitle}' from '{filePath}' at {sampleRate} Hz.");
+
+    if (diagnostics is not null)
+    {
+        PrintPt3TurboSoundDiagnostics(diagnostics);
+    }
+
+    Console.WriteLine(DescribePlaybackFlow(session.InputKind));
+    PrintPlaybackControls(session.LoopingController);
+
+    await RunPlaybackAsync(session.SampleProvider, playback, session.LoopingController);
 
     Console.WriteLine("Playback completed.");
 }
 
-static async Task PlayPt3ModuleAsync(string filePath, int sampleRate)
+static string DescribeInputKind(TurboSoundInputKind inputKind)
 {
-    var diagnostics = new Pt3TurboSoundModuleLoader().AnalyzeFromFile(filePath);
-    var module = new Pt3ModuleLoader().LoadFromFile(filePath);
-    var player = new Pt3Player(module, sampleRate, stopAfterOrderList: true);
-
-    using var emulator = CreateMonoEmulator();
-    var provider = new RetroSoundSampleProvider(player, emulator);
-    using var playback = CreatePlaybackService(provider);
-
-    Console.WriteLine($"Playing PT3 module '{module.Metadata.Title}' from '{filePath}' at {sampleRate} Hz.");
-    PrintPt3TurboSoundDiagnostics(diagnostics);
-    Console.WriteLine("Playback flow: PT3 parser -> PT3 tick player -> AY/YM emulator -> stereo adapter -> NAudio.");
-    PrintPlaybackControls(player);
-
-    await RunPlaybackAsync(provider, playback, player);
-
-    Console.WriteLine("Playback completed.");
+    return inputKind switch
+    {
+        TurboSoundInputKind.TsContainer => "TS container",
+        TurboSoundInputKind.Pt3Module => "PT3 module",
+        TurboSoundInputKind.Pt3TurboSoundModule => "PT3 TurboSound module",
+        _ => "RetroSound input",
+    };
 }
 
-static async Task PlayPt3TurboSoundModuleAsync(string filePath, int sampleRate)
+static string DescribePlaybackFlow(TurboSoundInputKind inputKind)
 {
-    var loadResult = new Pt3TurboSoundModuleLoader().LoadWithDiagnosticsFromFile(filePath);
-    var module = loadResult.Module;
-    var player = new DualChipPlayer(
-        new Pt3Player(module.FirstChip, sampleRate, stopAfterOrderList: true),
-        new Pt3Player(module.SecondChip, sampleRate, stopAfterOrderList: true));
-
-    using var chipAEmulator = CreateStereoEmulator();
-    using var chipBEmulator = CreateStereoEmulator();
-    var provider = new RetroSoundSampleProvider(player, chipAEmulator, chipBEmulator);
-    using var playback = CreatePlaybackService(provider);
-
-    Console.WriteLine($"Playing PT3 TurboSound module '{module.Title ?? Path.GetFileName(filePath)}' from '{filePath}' at {sampleRate} Hz.");
-    PrintPt3TurboSoundDiagnostics(loadResult.Diagnostics);
-    Console.WriteLine("Playback flow: PT3 TurboSound loader -> two PT3 tick players -> AY/YM emulators -> stereo mix -> NAudio.");
-    PrintPlaybackControls(player);
-
-    await RunPlaybackAsync(provider, playback, player);
-
-    Console.WriteLine("Playback completed.");
+    return inputKind switch
+    {
+        TurboSoundInputKind.TsContainer => "Playback flow: TS parser -> dual tick player -> AY/YM emulators -> stereo mix -> NAudio.",
+        TurboSoundInputKind.Pt3Module => "Playback flow: PT3 parser -> PT3 tick player -> AY/YM emulator -> NAudio.",
+        TurboSoundInputKind.Pt3TurboSoundModule => "Playback flow: PT3 TurboSound loader -> two PT3 tick players -> AY/YM emulators -> stereo mix -> NAudio.",
+        _ => "Playback flow: parser -> playback graph -> AY/YM emulation -> NAudio.",
+    };
 }
 
 static async Task RunPlaybackAsync(
@@ -268,13 +239,6 @@ static void PrintPt3TurboSoundDiagnostics(Pt3TurboSoundLoadDiagnostics diagnosti
         Console.WriteLine(
             $"  offset {candidate.Offset,5} | {candidate.HeaderKind,-25} | {candidate.Usage,-38} | parsed={(candidate.ParsedSuccessfully ? "yes" : "no")}{metadataSuffix}{failureSuffix}");
     }
-}
-
-static AyYmChipEmulator CreateMonoEmulator()
-{
-    return new AyYmChipEmulator(
-        new AyumiPcmRenderer(),
-        new AyYmChipConfiguration(outputChannelCount: 1));
 }
 
 static AyYmChipEmulator CreateStereoEmulator()
